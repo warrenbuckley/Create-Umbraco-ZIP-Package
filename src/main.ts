@@ -1,6 +1,7 @@
 // Github Actions helper modules from NPM
 import * as core from '@actions/core';
 import * as io from '@actions/io';
+import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 
 // NPM Community modules
@@ -200,6 +201,9 @@ async function savePackageXmlFile(packageXmlContents:convert.ElementCompact) : P
 }
 
 async function createPackageZip(packageName:string, packageVersion:string): Promise<number>{
+
+  const all7ZipVersions = tc.findAllVersions('7zip');
+  core.debug(`7ZIP: ${all7ZipVersions}`);
 
   // Verify 7Zip is available
   // 7Zip is on Windows VM on GH Actions
