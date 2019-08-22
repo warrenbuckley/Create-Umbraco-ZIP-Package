@@ -213,6 +213,6 @@ async function createPackageZip(packageName:string, packageVersion:string): Prom
   // Run CMD line 7Zip
   // The .\ tells 7Zip to not include the root folder inside the archive
   // Path.
-  return exec.exec('7z', ['a', '-r', zipFileOutPath, '.\\build.tmp.package\\*');
+  return exec.exec('7z', ['a', '-r', zipFileOutPath, '.\\build.tmp.umb\\*']);
 
 }
