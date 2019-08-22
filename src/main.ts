@@ -1,7 +1,6 @@
 // Github Actions helper modules from NPM
 import * as core from '@actions/core';
 import * as io from '@actions/io';
-import * as tc from '@actions/tool-cache';
 import * as exec from '@actions/exec';
 
 // NPM Community modules
@@ -202,18 +201,17 @@ async function savePackageXmlFile(packageXmlContents:convert.ElementCompact) : P
 
 async function createPackageZip(packageName:string, packageVersion:string): Promise<number>{
 
-  const all7ZipVersions = tc.findAllVersions('7z');
-  core.debug(`7z: ${all7ZipVersions}`);
-
   // Verify 7Zip is available
   // 7Zip is on Windows VM on GH Actions
   // https://help.github.com/en/articles/software-in-virtual-environments-for-github-actions#windows-server-2019
 
   var zipFileName = `${packageName}${packageVersion}.zip`;
-  var zipFileOutPath = path.resolve(path.join('./out', zipFileName));
+  var zipFileOutPath = path.join('./out', zipFileName);
   var folderToZipUp = path.resolve('./build.tmp.umb');
 
   // Run CMD line 7Zip
-  return exec.exec('7z', ['a', '-r', zipFileOutPath, folderToZipUp]);
+  // The .\ tells 7Zip to not include the root folder inside the archive
+  // Path.
+  return exec.exec('7z', ['a', '-r', zipFileOutPath, '.\\build.tmp.package\\*');
 
 }
