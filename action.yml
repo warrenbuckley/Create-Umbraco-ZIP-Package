@@ -9,7 +9,7 @@ inputs:
 
   packageFilesPath:
     description: 'The path to the folder containing all the files needed for the package, excluding the package.xml'
-    default: 'build.tmp/zip'
+    default: 'build.tmp.package'
     required: true
 
   packageVersion:
