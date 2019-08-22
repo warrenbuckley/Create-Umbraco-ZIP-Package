@@ -202,8 +202,8 @@ async function savePackageXmlFile(packageXmlContents:convert.ElementCompact) : P
 
 async function createPackageZip(packageName:string, packageVersion:string): Promise<number>{
 
-  const all7ZipVersions = tc.findAllVersions('7zip');
-  core.debug(`7ZIP: ${all7ZipVersions}`);
+  const all7ZipVersions = tc.findAllVersions('7z');
+  core.debug(`7z: ${all7ZipVersions}`);
 
   // Verify 7Zip is available
   // 7Zip is on Windows VM on GH Actions
@@ -214,6 +214,6 @@ async function createPackageZip(packageName:string, packageVersion:string): Prom
   var folderToZipUp = path.resolve('./build.tmp.umb');
 
   // Run CMD line 7Zip
-  return exec.exec('7zip', ['a', '-r', zipFileOutPath, folderToZipUp]);
+  return exec.exec('7z', ['a', '-r', zipFileOutPath, folderToZipUp]);
 
 }
