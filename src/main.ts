@@ -206,7 +206,7 @@ async function createPackageZip(packageName:string, packageVersion:string): Prom
   // https://help.github.com/en/articles/software-in-virtual-environments-for-github-actions#windows-server-2019
 
   var zipFileName = `${packageName}${packageVersion}.zip`;
-  var zipFileOutPath = path.join('./out', zipFileName);
+  var zipFileOutPath = path.join('./output', zipFileName);
   var folderToZipUp = path.resolve('./build.tmp.umb');
 
   // Run CMD line 7Zip
