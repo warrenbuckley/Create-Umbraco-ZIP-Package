@@ -74,8 +74,9 @@ async function run() {
       }
 
       // save/copy file to 'build.tmp.umb' folder as newFileName
-      // TODO: Y U NO COPY?!
       fs.copyFileSync(path.join(packageFilesPath, filepath), newFileLocation);
+
+      core.debug(`Copying ${path.join(packageFilesPath, filepath)} to ${newFileLocation}`);
 
       // update JSON push new item into files array/xml
       if(packageXmlContents != null){
