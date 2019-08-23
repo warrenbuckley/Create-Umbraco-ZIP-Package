@@ -16,6 +16,11 @@ inputs:
     description: 'A version for the Umbraco package such as 1.3.2'
     required: true
 
+  packageZipOutPath:
+    description: 'A version for the Umbraco package such as 1.3.2'
+    default: 'output'
+    required: true
+
 runs:
   using: 'node12'
   main: 'lib/main.js'
