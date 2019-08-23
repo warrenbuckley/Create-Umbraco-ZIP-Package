@@ -69,7 +69,7 @@ async function run() {
 
       // rename file to GUID.txt
       var newFileName = guid + fileExt;
-      var newFileLocation = path.join(BUILD_PKG_FOLDER, fileDirName, newFileName);
+      var newFileLocation = path.join(BUILD_PKG_FOLDER, newFileName);
 
       // Ensure directory is created/exists in build.tmp.umb (as copy will fail)
       if(fs.existsSync(path.dirname(newFileLocation)) === false){
@@ -88,7 +88,7 @@ async function run() {
         // orgPath == bin or App_Plugins/MyPackage
         // orgName == original-file-name.dll
         var fileObj = {
-          guid: guid,
+          guid: newFileName,
           orgPath: fileDirName,
           orgName: filename
         };
