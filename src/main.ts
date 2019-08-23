@@ -11,6 +11,8 @@ import uuidv4 from 'uuid/v4';
 import * as fs from 'fs';
 import * as path from 'path';
 
+const BUILD_PKG_FOLDER = "build.tmp.umb";
+
 async function run() {
   try {
 
@@ -18,6 +20,7 @@ async function run() {
     const packageXmlPath = core.getInput('packageXmlPath', { required: true });
     const packageVersion = core.getInput('packageVersion', { required: true });
     const packageFilesPath = core.getInput('packageFilesPath', { required: true });
+    const packageZipOutPath = core.getInput('packageZipOutPath', { required: true });
 
     // var packageXmlPath = "./package.xml";
     // var packageVersion = "1.4.1";
@@ -66,7 +69,7 @@ async function run() {
 
       // rename file to GUID.txt
       var newFileName = guid + fileExt;
-      var newFileLocation = path.join('./build.tmp.umb', fileDirName, newFileName);
+      var newFileLocation = path.join(BUILD_PKG_FOLDER, fileDirName, newFileName);
 
       // Ensure directory is created/exists in build.tmp.umb (as copy will fail)
       if(fs.existsSync(path.dirname(newFileLocation)) === false){
@@ -106,7 +109,7 @@ async function run() {
     packageNameFromXml = packageNameFromXml.replace(' ', '_');
 
     // Create a ZIP package of the folder 'build.tmp.umb'
-    await createPackageZip(packageNameFromXml, packageVersion);
+    await createPackageZip(packageZipOutPath, packageNameFromXml, packageVersion);
 
     // YAY all done :)
 
@@ -120,7 +123,7 @@ run();
 
 function openPackageXML(pathToXml:string):convert.ElementCompact | null {
 
-  core.debug(`Checking if file ${pathToXml} exists`);
+  core.debug(`Checking if package.xml file at '${pathToXml}' exists`);
 
   // Check file exists first
   if(fs.existsSync(pathToXml) === false){
@@ -129,13 +132,13 @@ function openPackageXML(pathToXml:string):convert.ElementCompact | null {
     return null;
   }
 
-  core.debug(`File found, now reading its contents`);
+  core.debug(`Package.xml file found, now reading its contents`);
 
   // Read the file contents
   // TODO: May need to wrap in try/catch as permissions or locking perhaps?
   var xmlContents = fs.readFileSync(pathToXml).toString();
 
-  core.debug(`File opened, now attempting to convert XML to JS object`);
+  core.debug(`Package.xml file opened, now attempting to convert XML to JS object`);
 
   // Convert XML to JSON object
   // Throw error if invalid XML or not XML etc...
@@ -145,7 +148,7 @@ function openPackageXML(pathToXml:string):convert.ElementCompact | null {
     alwaysChildren: true
   };
   var result = convert.xml2js(xmlContents, options);
-  core.debug(`XML converted to JS: ${result}`);
+  core.debug(`XML converted to JS: ${JSON.stringify(result)}`);
 
   return result as convert.ElementCompact;
 }
@@ -162,13 +165,13 @@ function updatePackageVersion(version:string, packageXmlContents:convert.Element
 
 async function createBuildUmbTmp():Promise<void> {
   // Check if we already have a folder called build.tmp.umb
-  if(fs.existsSync('./build.tmp.umb')){
+  if(fs.existsSync(BUILD_PKG_FOLDER)){
     // Delete the folder - so we know it's CLEAN
-    await io.rmRF('./build.tmp.umb');
+    await io.rmRF(BUILD_PKG_FOLDER);
   }
 
   // Create the folder so it's empty & squeeky clean
-  await io.mkdirP('./build.tmp.umb');
+  await io.mkdirP(BUILD_PKG_FOLDER);
 }
 
 function getFilesFromDir(dir) {
@@ -194,25 +197,25 @@ async function savePackageXmlFile(packageXmlContents:convert.ElementCompact) : P
   // Convert the JS object back to XML string with tab indentation
   var xmlString = convert.js2xml(packageXmlContents, { compact: true, spaces: '\t' });
 
-  core.debug(`Saving XML to './build.tmp.umb/package.xml'`);
+  core.debug(`Saving XML to '${BUILD_PKG_FOLDER}/package.xml'`);
 
   // Save the NEW package.xml as './build.tmp.umb/package.xml'
-  return fs.writeFileSync('./build.tmp.umb/package.xml', xmlString);
+  return fs.writeFileSync(`${BUILD_PKG_FOLDER}/package.xml`, xmlString);
 }
 
-async function createPackageZip(packageName:string, packageVersion:string): Promise<number>{
+async function createPackageZip(packageOutPath:string, packageName:string, packageVersion:string): Promise<number>{
 
   // Verify 7Zip is available
   // 7Zip is on Windows VM on GH Actions
   // https://help.github.com/en/articles/software-in-virtual-environments-for-github-actions#windows-server-2019
 
   var zipFileName = `${packageName}${packageVersion}.zip`;
-  var zipFileOutPath = path.join('./output', zipFileName);
-  var folderToZipUp = path.resolve('./build.tmp.umb');
+  var zipFileOutPath = path.join(packageOutPath, zipFileName);
+
+  core.debug(`Creating Umbraco Package ZIP at ${zipFileOutPath}`);
 
   // Run CMD line 7Zip
   // The .\ tells 7Zip to not include the root folder inside the archive
-  // Path.
-  return exec.exec('7z', ['a', '-r', zipFileOutPath, '.\\build.tmp.umb\\*']);
+  return exec.exec('7z', ['a', '-r', zipFileOutPath, `.\\${BUILD_PKG_FOLDER}\\*`]);
 
 }
